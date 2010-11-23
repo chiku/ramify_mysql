@@ -1,0 +1,44 @@
+#!/bin/sh
+
+NAME=ramify_mysql
+PATH_TO_DATA=/usr/local/mysql/data/
+SIZE_IN_MB=512
+MYSQL_OWNER=_mysql:wheel
+
+start_ramify() {
+  sectors=$((2*1024*SIZE_IN_MB));
+  device=$(hdik -drivekey system-image=yes -nomount ram://$sectors)
+  newfs_hfs $device
+  mount -t hfs -o union -o nobrowse $device $PATH_TO_DATA
+  chown $MYSQL_OWNER $PATH_TO_DATA
+}
+
+stop_ramify() {
+  diskutil unmount $PATH_TO_DATA
+}
+
+main() {
+  case "$1" in
+
+  start)
+    echo "Starting $NAME..."
+    start_ramify
+    ;;
+
+  stop)
+    echo "Stopping $NAME" 
+    stop_ramify
+    ;;
+
+  *)
+    echo "Usage: $NAME {start|stop}"
+    exit 1
+    ;;
+
+  esac
+}
+
+set -e
+test "$(whoami)" != 'root' && (echo "You are using a non-privileged account"; return 1;)
+
+main
