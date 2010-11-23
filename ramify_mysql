@@ -1,9 +1,10 @@
 #!/bin/sh
 
 NAME=ramify_mysql
-PATH_TO_DATA=/usr/local/mysql/data/
+PATH_TO_DATA=/usr/local/mysql/data
 SIZE_IN_MB=512
 MYSQL_OWNER=_mysql:wheel
+MYSQL_SCRIPT=/Library/StartupItems/MySQLCOM/MySQLCOM
 
 start_ramify() {
   sectors=$((2*1024*SIZE_IN_MB));
@@ -14,10 +15,13 @@ start_ramify() {
 }
 
 stop_ramify() {
+  $MYSQL_SCRIPT stop
   diskutil unmount $PATH_TO_DATA
+  $MYSQL_SCRIPT start
 }
 
 main() {
+  echo $1
   case "$1" in
 
   start)
@@ -26,7 +30,7 @@ main() {
     ;;
 
   stop)
-    echo "Stopping $NAME" 
+    echo "Stopping $NAME"
     stop_ramify
     ;;
 
@@ -39,6 +43,6 @@ main() {
 }
 
 set -e
-test "$(whoami)" != 'root' && (echo "You are using a non-privileged account"; )
+test "$(whoami)" != 'root' && (echo "You are using a non-privileged account"; return 1;)
 
-main
+main $1
