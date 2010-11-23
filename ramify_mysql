@@ -39,6 +39,6 @@ main() {
 }
 
 set -e
-test "$(whoami)" != 'root' && (echo "You are using a non-privileged account"; return 1;)
+test "$(whoami)" != 'root' && (echo "You are using a non-privileged account"; )
 
 main
