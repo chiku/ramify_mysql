@@ -6,6 +6,12 @@ SIZE_IN_MB=512
 MYSQL_OWNER=_mysql:wheel
 MYSQL_SCRIPT=/Library/StartupItems/MySQLCOM/MySQLCOM
 
+with_stopped_mysql_do() {
+  $MYSQL_SCRIPT stop
+  $1
+  $MYSQL_SCRIPT start
+}
+
 start_ramify() {
   sectors=$((2*1024*SIZE_IN_MB));
   device=$(hdik -drivekey system-image=yes -nomount ram://$sectors)
@@ -15,23 +21,28 @@ start_ramify() {
 }
 
 stop_ramify() {
-  $MYSQL_SCRIPT stop
   diskutil unmount $PATH_TO_DATA
-  $MYSQL_SCRIPT start
+}
+
+test_root() {
+  if [[ $(/usr/bin/id -u) -ne 0 ]]
+  then
+    echo "You are using a non-privileged account"
+    exit 1
+  fi
 }
 
 main() {
-  echo $1
   case "$1" in
 
   start)
     echo "Starting $NAME..."
-    start_ramify
+    with_stopped_mysql_do start_ramify
     ;;
 
   stop)
     echo "Stopping $NAME"
-    stop_ramify
+    with_stopped_mysql_do stop_ramify
     ;;
 
   *)
@@ -42,7 +53,5 @@ main() {
   esac
 }
 
-set -e
-test "$(whoami)" != 'root' && (echo "You are using a non-privileged account"; return 1;)
-
+test_root
 main $1
