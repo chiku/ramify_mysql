@@ -3,3 +3,5 @@ This is a script to put a directory data on a ramdisk via union mount on Mac OS 
 The defaults are to create a ramdisk for MySQL, however this script can be used for other cases as well.
 
 Modify the script to your liking.
+
+This script is released under the MIT license. Please refer to LICENSE for more details.
